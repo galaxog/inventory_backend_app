@@ -1,0 +1,34 @@
+{
+	"info": {
+		"_postman_id": "2a7320c6-6c02-42dc-a309-c906cb926d1c",
+		"name": "Inventory test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "109149"
+	},
+	"item": [
+		{
+			"name": "add product",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "get product",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "update inventory",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	]
+}
