@@ -1,0 +1,8 @@
+[project]
+name = "sample_inventory_service"
+version = "0.1.0"
+description = "FastAPI + Postgres + SQLAlchemy + Alembic service"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["app"]
