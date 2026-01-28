@@ -3,17 +3,14 @@ import logging
 from fastapi import APIRouter, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+
 from app import models
-from app.api.product.schemas import (
-    ProductCreateRequest,
-    ProductCreateResponse,
-    UpdateProductInventoryRequest
-)
-from app.api.product.exceptions import (
-    ProductAlreadyExistsException,
-    ProductNotFoundException,
-    InvalidInventoryUpdateException
-)
+from app.api.product.exceptions import (InvalidInventoryUpdateException,
+                                        ProductAlreadyExistsException,
+                                        ProductNotFoundException)
+from app.api.product.schemas import (ProductCreateRequest,
+                                     ProductCreateResponse,
+                                     UpdateProductInventoryRequest)
 
 logger = logging.getLogger("api")
 router = APIRouter(
@@ -21,6 +18,7 @@ router = APIRouter(
     tags=["products"],
     responses={404: {"description": "Not found"}},
 )
+
 
 @router.post("/")
 async def create_product(validated_data: ProductCreateRequest):
@@ -35,7 +33,10 @@ async def create_product(validated_data: ProductCreateRequest):
     ).one_or_none()
 
     if existing_product is not None:
-        logger.error("Product creation failed: Product with name '%s' already exists.", validated_data.name)
+        logger.error(
+            "Product creation failed: Product with name '%s' already exists.",
+            validated_data.name,
+        )
         raise ProductAlreadyExistsException(
             description=f"Product with name '{validated_data.name}' already exists."
         )
@@ -67,6 +68,7 @@ async def create_product(validated_data: ProductCreateRequest):
         content=jsonable_encoder(response_data),
     )
 
+
 @router.get("/{product_id}")
 async def get_product(product_id: int):
     """
@@ -74,12 +76,12 @@ async def get_product(product_id: int):
     :param product_id: ID of the product to retrieve
     """
 
-    product = models.Product.query.filter(
-        models.Product.id == product_id
-    ).one_or_none()
+    product = models.Product.query.filter(models.Product.id == product_id).one_or_none()
 
     if product is None:
-        logger.error("Product retrieval failed: Product with ID '%s' not found.", product_id)
+        logger.error(
+            "Product retrieval failed: Product with ID '%s' not found.", product_id
+        )
         raise ProductNotFoundException(
             description=f"Product with ID '{product_id}' not found."
         )
@@ -99,6 +101,7 @@ async def get_product(product_id: int):
         content=jsonable_encoder(response_data),
     )
 
+
 @router.post("/{product_id}/update_inventory")
 async def update_product_inventory(
     product_id: int, validated_data: UpdateProductInventoryRequest
@@ -109,12 +112,12 @@ async def update_product_inventory(
     :param validated_data: UpdateProductInventoryRequest
     """
 
-    product = models.Product.query.filter(
-        models.Product.id == product_id
-    ).one_or_none()
+    product = models.Product.query.filter(models.Product.id == product_id).one_or_none()
 
     if product is None:
-        logger.error("Inventory update failed: Product with ID '%s' not found.", product_id)
+        logger.error(
+            "Inventory update failed: Product with ID '%s' not found.", product_id
+        )
         raise ProductNotFoundException(
             description=f"Product with ID '{product_id}' not found."
         )
@@ -127,7 +130,9 @@ async def update_product_inventory(
         )
         logger.info("Updated inventory for product ID %s", product.id)
     except ValueError as e:
-        logger.error("Inventory update failed for product ID %s: %s", product.id, str(e))
+        logger.error(
+            "Inventory update failed for product ID %s: %s", product.id, str(e)
+        )
         raise InvalidInventoryUpdateException(description=str(e))
 
     return JSONResponse(

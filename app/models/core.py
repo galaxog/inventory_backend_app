@@ -3,7 +3,6 @@ from datetime import datetime
 
 from . import Base, db
 
-
 # class User(Base):
 #
 #     email = db.Column(db.String(320), nullable=False, index=True)
@@ -28,6 +27,7 @@ from . import Base, db
 #         db.Index("ix_refresh_tokens_user_id_revoked", "user_id", "revoked"),
 #     )
 
+
 class Product(Base):
 
     class UpdateType(enum.Enum):
@@ -41,17 +41,21 @@ class Product(Base):
     # creator = db.relationship("User")
     inventory = db.Column(db.Integer, nullable=False, default=1)
     created_at = db.Column(db.DateTime, nullable=False, default=db.func.now())
-    updated_at = db.Column(db.DateTime, nullable=False, default=db.func.now(), onupdate=db.func.now())
+    updated_at = db.Column(
+        db.DateTime, nullable=False, default=db.func.now(), onupdate=db.func.now()
+    )
     inventory_updates = db.relationship(
         "InventoryUpdates",
         back_populates="product",
         cascade="all, delete-orphan",
-        passive_deletes=True,   # aligns with ondelete="CASCADE"
+        passive_deletes=True,  # aligns with ondelete="CASCADE"
     )
 
     __table_args__ = (db.UniqueConstraint("name", name="uq_product_name"),)
 
-    def update_inventory(self, quantity: int, type: UpdateType, reason_code: str = None):
+    def update_inventory(
+        self, quantity: int, type: UpdateType, reason_code: str = None
+    ):
         """
         Update inventory and log the change.
         Inventory cannot be a negative number
@@ -80,11 +84,17 @@ class Product(Base):
 
 class InventoryUpdates(Base):
 
-    product_id = db.Column(db.Integer, db.ForeignKey("product.id", ondelete="CASCADE"), nullable=False, index=True)
+    product_id = db.Column(
+        db.Integer,
+        db.ForeignKey("product.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
     product = db.relationship("Product", back_populates="inventory_updates")
     quantity = db.Column(db.Integer, nullable=False, default=0)
     reason_code = db.Column(db.String(100), nullable=True)
     # updated_by = db.Column(db.ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     created_at = db.Column(db.DateTime, nullable=False, default=db.func.now())
-    updated_at = db.Column(db.DateTime, nullable=False, default=db.func.now(), onupdate=db.func.now())
-
+    updated_at = db.Column(
+        db.DateTime, nullable=False, default=db.func.now(), onupdate=db.func.now()
+    )

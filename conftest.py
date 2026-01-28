@@ -6,7 +6,9 @@ import pytest
 from dotenv import load_dotenv
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session, declarative_base
-from app.models import _ModelBase, metadata, dispose_engine, Product, InventoryUpdates
+
+from app.models import (InventoryUpdates, Product, _ModelBase, dispose_engine,
+                        metadata)
 
 BASEDIR = Path(".")
 load_dotenv(BASEDIR / ".env")
@@ -16,6 +18,7 @@ os.environ["ENVIRONMENT"] = "testing"
 @pytest.fixture(scope="session")
 def fastapi_app():
     from app import create_app
+
     return create_app("testing")
 
 
@@ -24,6 +27,7 @@ def db_engine(fastapi_app, request):
     """Provides a SQLAlchemy engine for the test session."""
     # Create tables before tests
     import app.models.core
+
     engine = fastapi_app.state.db_engine
     base = declarative_base(cls=_ModelBase, metadata=metadata)
     base.metadata.create_all(bind=engine, checkfirst=False)
@@ -58,6 +62,7 @@ def fastapi_client(fastapi_app):
     with TestClient(fastapi_app) as c:
         yield c
 
+
 @pytest.fixture
 def product1(fastapi_db_session):
     from app.models import Product
@@ -69,7 +74,7 @@ def product1(fastapi_db_session):
             name="Test Product 1",
             description="A test product",
             price=9.99,
-            inventory=100
+            inventory=100,
         )
         fastapi_db_session.add(product)
         fastapi_db_session.commit()

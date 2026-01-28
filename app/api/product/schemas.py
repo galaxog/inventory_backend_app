@@ -2,7 +2,9 @@ from dataclasses import dataclass
 from typing import Optional
 
 from pydantic import BaseModel
+
 from app import models
+
 
 @dataclass
 class ProductCreateRequest(BaseModel):
@@ -26,4 +28,3 @@ class ProductCreateResponse:
     description: str
     price: float
     inventory: int
-

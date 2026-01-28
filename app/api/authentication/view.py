@@ -6,22 +6,21 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi_jwt_auth import AuthJWT
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_db
-from app.api.authentication.schemas import LoginRequest, TokenPair
 from app import models
+from app.api.authentication.schemas import LoginRequest, TokenPair
+from app.api.dependencies import get_db
 from app.utils.security import verify_password
-
 
 router = APIRouter()
 
 
 @router.post("/login", response_model=TokenPair)
 def login(payload: LoginRequest, request: Request, Authorize: AuthJWT = Depends()):
-    user = models.User.query.filter(
-        models.User.email == payload.email.lower()
-    ).first()
+    user = models.User.query.filter(models.User.email == payload.email.lower()).first()
     if not user or not verify_password(payload.password, user.hashed_password):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Bad credentials")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Bad credentials"
+        )
 
     subject = str(user.id)
     access_token = Authorize.create_access_token(subject=subject)
@@ -50,7 +49,9 @@ def refresh(request: Request, Authorize: AuthJWT = Depends()):
     # Read raw refresh token from Authorization header to extract JTI for lookup
     authz = request.headers.get("Authorization", "")
     if not authz.startswith("Bearer "):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing refresh token")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing refresh token"
+        )
     raw_refresh = authz.split(" ", 1)[1].strip()
 
     refresh_jti = Authorize.get_jti(raw_refresh)
@@ -60,16 +61,23 @@ def refresh(request: Request, Authorize: AuthJWT = Depends()):
     ).first()
 
     if not row or row.revoked:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token revoked or unknown")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token revoked or unknown",
+        )
     if row.expires_at <= datetime.utcnow():
         row.revoked = True
         models.db.session.add(row)
         models.db.session.commit()
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token expired")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token expired"
+        )
 
     subject = Authorize.get_jwt_subject()
     if str(row.user_id) != str(subject):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token mismatch")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token mismatch"
+        )
 
     # Revoke old token (rotation)
     row.revoked = True

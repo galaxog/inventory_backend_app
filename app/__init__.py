@@ -5,17 +5,17 @@ from typing import Optional
 
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
+
+from app.api.authentication.exceptions import APIAuthError
+from app.api.product.exceptions import (InvalidInventoryUpdateException,
+                                        ProductAlreadyExistsException,
+                                        ProductNotFoundException)
+from app.state import setup_state
+
 # from fastapi_jwt_auth import AuthJWT
 # from fastapi_jwt_auth.exceptions import AuthJWTException
 # from pydantic_settings import BaseSettings
 
-from app.api.product.exceptions import (
-    ProductAlreadyExistsException,
-    ProductNotFoundException,
-    InvalidInventoryUpdateException
-)
-from app.state import setup_state
-from app.api.authentication.exceptions import APIAuthError
 
 
 def create_app(env_name: Optional[str] = None) -> FastAPI:
@@ -24,11 +24,15 @@ def create_app(env_name: Optional[str] = None) -> FastAPI:
     state = setup_state(env_name)
     cfg = state.settings
 
-    app = FastAPI(title="Sample Inventory Service", description="FastAPI + Postgres + SQLAlchemy + Alembic service")
+    app = FastAPI(
+        title="Sample Inventory Service",
+        description="FastAPI + Postgres + SQLAlchemy + Alembic service",
+    )
     app.state.cfg = cfg
 
     # Attach DB factory + engine (Flask-SQLAlchemy-like surface)
     from app.models import db
+
     app.state.db = db.session
     app.state.db_engine = db.engine
     # JWT config is loaded from app.state.cfg (patterned after your existing app)
@@ -43,6 +47,7 @@ def create_app(env_name: Optional[str] = None) -> FastAPI:
 
     # Routers
     from app.api import api_router
+
     app.include_router(api_router)
 
     # Exception handlers
@@ -55,21 +60,27 @@ def create_app(env_name: Optional[str] = None) -> FastAPI:
     #     return JSONResponse(status_code=exc.status_code, content={"message": exc.description})
 
     @app.exception_handler(ProductAlreadyExistsException)
-    async def product_already_exists_exception_handler(request, exc: ProductAlreadyExistsException):
+    async def product_already_exists_exception_handler(
+        request, exc: ProductAlreadyExistsException
+    ):
         return JSONResponse(
             status_code=exc.status_code,
             content={"message": exc.description},
         )
 
     @app.exception_handler(ProductNotFoundException)
-    async def product_not_found_exception_handler(request, exc: ProductNotFoundException):
+    async def product_not_found_exception_handler(
+        request, exc: ProductNotFoundException
+    ):
         return JSONResponse(
             status_code=exc.status_code,
             content={"message": exc.description},
         )
 
     @app.exception_handler(InvalidInventoryUpdateException)
-    async def invalid_inventory_update_exception_handler(request, exc: InvalidInventoryUpdateException):
+    async def invalid_inventory_update_exception_handler(
+        request, exc: InvalidInventoryUpdateException
+    ):
         return JSONResponse(
             status_code=exc.status_code,
             content={"message": exc.description},
@@ -86,6 +97,7 @@ def create_app(env_name: Optional[str] = None) -> FastAPI:
     async def _shutdown():
         try:
             from app.models import dispose_engine
+
             dispose_engine()
         except Exception:
             pass

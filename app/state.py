@@ -34,7 +34,11 @@ def setup_state(env_name: str | None = None) -> AppState:
     )
 
     # Use test db if env == testing
-    db_url = settings.SQLALCHEMY_DATABASE_URI_TEST if env == "testing" else settings.SQLALCHEMY_DATABASE_URI
+    db_url = (
+        settings.SQLALCHEMY_DATABASE_URI_TEST
+        if env == "testing"
+        else settings.SQLALCHEMY_DATABASE_URI
+    )
     if not db_url:
         raise RuntimeError("SQLALCHEMY_DATABASE_URI is not configured")
 

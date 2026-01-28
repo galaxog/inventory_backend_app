@@ -2,11 +2,9 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
-
-from app.api.users.schemas import UserCreate, UserOut
 from app import models
+from app.api.users.schemas import UserCreate, UserOut
 from app.utils.security import hash_password
-
 
 router = APIRouter()
 
@@ -17,13 +15,15 @@ def register(payload: UserCreate, request: Request):
 
     email = payload.email.lower()
     if len(payload.password) < cfg.MIN_PASSWORD_LEN:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Password too short")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Password too short"
+        )
 
-    existing = models.User.query.filter(
-        models.User.email == email
-    ).first()
+    existing = models.User.query.filter(models.User.email == email).first()
     if existing:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User already exists")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="User already exists"
+        )
 
     user = models.User(
         email=email,

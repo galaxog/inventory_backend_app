@@ -4,29 +4,11 @@ import hashlib
 import re
 from typing import Any, Dict, Optional
 
-from sqlalchemy import (
-    BigInteger,
-    Boolean,
-    CheckConstraint,
-    Column,
-    Date,
-    DateTime,
-    Enum,
-    Float,
-    ForeignKey,
-    Index,
-    Integer,
-    LargeBinary,
-    MetaData,
-    Numeric,
-    PrimaryKeyConstraint,
-    SmallInteger,
-    String,
-    Text,
-    UniqueConstraint,
-    JSON,
-    create_engine,
-)
+from sqlalchemy import (JSON, BigInteger, Boolean, CheckConstraint, Column,
+                        Date, DateTime, Enum, Float, ForeignKey, Index,
+                        Integer, LargeBinary, MetaData, Numeric,
+                        PrimaryKeyConstraint, SmallInteger, String, Text,
+                        UniqueConstraint)
 from sqlalchemy import and_ as _saand
 from sqlalchemy import case as _sacase
 from sqlalchemy import cast as _sacast
@@ -40,8 +22,10 @@ from sqlalchemy import or_ as _saor
 from sqlalchemy import select as _saselect
 from sqlalchemy import text as _satext
 from sqlalchemy import true as _satrue
-from sqlalchemy.orm import declarative_base, declared_attr, scoped_session, sessionmaker, relationship, backref
+from sqlalchemy.orm import (backref, declarative_base, declared_attr,
+                            relationship, scoped_session, sessionmaker)
 from sqlalchemy.pool import NullPool
+
 try:
     from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 except Exception:  # pragma: no cover
@@ -124,7 +108,9 @@ class _DB:
     select = staticmethod(_saselect)
     exists = staticmethod(_saexists)
 
+
 db = _DB()
+
 
 # Provide Flask-SQLAlchemy-style `.query` on models
 class _QueryProperty:
@@ -139,7 +125,10 @@ class _QueryProperty:
 # Attach `.query` to every model class deriving from Base
 setattr(Base, "query", _QueryProperty())
 
-def init_engine_session(db_uri: str, testing: bool = False, **engine_kwargs: Any) -> scoped_session:
+
+def init_engine_session(
+    db_uri: str, testing: bool = False, **engine_kwargs: Any
+) -> scoped_session:
     """Create engine + scoped_session, and attach them to `db` and `Base.query`."""
 
     defaults: Dict[str, Any] = dict(
@@ -150,7 +139,10 @@ def init_engine_session(db_uri: str, testing: bool = False, **engine_kwargs: Any
     is_sqlite = db_uri.startswith("sqlite")
     if is_sqlite:
         # sqlite doesn't support the same pooling kwargs
-        engine_kwargs = {"connect_args": {"check_same_thread": False}, "poolclass": NullPool}
+        engine_kwargs = {
+            "connect_args": {"check_same_thread": False},
+            "poolclass": NullPool,
+        }
     defaults.update(engine_kwargs or {})
 
     engine = create_engine(db_uri, future=True, **defaults)
@@ -183,5 +175,3 @@ def dispose_engine() -> None:
 
 # Import models so Alembic sees them
 from app.models.core import *  # noqa: E402,F401
-
-

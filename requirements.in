@@ -1,14 +1,14 @@
 fastapi
 uvicorn[standard]
-SQLAlchemy>=2.0
+SQLAlchemy >= 2.0
 alembic
 psycopg[binary]
-pydantic-settings
-python-dotenv
+pydantic - settings
+python - dotenv
 passlib[bcrypt]
-fastapi-jwt-auth
-python-jose[cryptography]
-email-validator
+fastapi - jwt - auth
+python - jose[cryptography]
+email - validator
 
 # tests
 pytest

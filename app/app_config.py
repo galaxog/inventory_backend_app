@@ -34,7 +34,9 @@ class Settings(BaseSettings):
 
     # DB
     SQLALCHEMY_DATABASE_URI: str = os.getenv("SQLALCHEMY_DATABASE_URI", "")
-    SQLALCHEMY_DATABASE_URI_TEST: str = os.getenv("SQLALCHEMY_DATABASE_URI_TEST", "sqlite+pysqlite:///./test.db")
+    SQLALCHEMY_DATABASE_URI_TEST: str = os.getenv(
+        "SQLALCHEMY_DATABASE_URI_TEST", "sqlite+pysqlite:///./test.db"
+    )
 
     # Connection pool
     SQLALCHEMY_POOL_SIZE: int = int(os.getenv("SQLALCHEMY_POOL_SIZE", 5))
